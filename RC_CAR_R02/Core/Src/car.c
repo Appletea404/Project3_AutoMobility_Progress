@@ -42,12 +42,12 @@ void Car_Move(car_state_t state, speed_state_t speed)
     /* 좌/우 회전: 좌 50 / 우 0, 좌 0 / 우 50 */
     case CAR_LEFT:
       Direction_Set(DIR_FRONT);
-      Speed_SetStateBoth(SPD_50, SPD_STOP);
+      Speed_SetStateBoth(speed, SPD_STOP);
       break;
 
     case CAR_RIGHT:
       Direction_Set(DIR_FRONT);
-      Speed_SetStateBoth(SPD_STOP, SPD_50);
+      Speed_SetStateBoth(SPD_STOP, speed);
       break;
 
     /* 대각 전진: 50/speed, speed/50 */

@@ -26,9 +26,6 @@
 /* USER CODE BEGIN Includes */
 #include <string.h>
 #include "dc_car.h"
-//#include "bt_slave.h"
-
-
 
 /* USER CODE END Includes */
 
@@ -52,6 +49,8 @@
 /* USER CODE BEGIN PV */
 
 volatile uint8_t rxData[1];
+volatile uint8_t rxFlag = 0;  
+volatile uint8_t rxCmd = 0;   
 
 /* USER CODE END PV */
 
@@ -59,21 +58,16 @@ volatile uint8_t rxData[1];
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)		//블루투스 인터럽트
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	uint8_t cmd = rxData[0];
-
-
-
-     HAL_UART_Transmit(&huart1, &cmd, 1, 10);
-     DC_CONTROL(cmd);
-
-     HAL_UART_Receive_IT(&huart1, rxData, 1);
-
-
+    if (huart->Instance == USART1)
+    {
+        rxCmd = rxData[0];     
+        rxFlag = 1;            
+        
+        HAL_UART_Receive_IT(&huart1, (uint8_t *)rxData, 1); 
+    }
 }
-
-
 
 /* USER CODE END PFP */
 
@@ -116,17 +110,11 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   
-//  BT_SlaveInit();
-  HAL_TIM_Base_Start_IT(&htim3);
-  HAL_TIM_Base_Start_IT(&htim2);
-  HAL_UART_Receive_IT(&huart1, rxData, 1);  // 블루투스 수신 인터럽트 시작
-
-
-//  GO_UP();
-
-
-
-
+  // PWM 채널 시작 (속도 제어용)
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  
+  HAL_UART_Receive_IT(&huart1, (uint8_t *)rxData, 1);  
 
   /* USER CODE END 2 */
 
@@ -134,15 +122,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
-//	  DC_CONTROL(rxData);
-
-
-
-
-//	  DC_RUN();
-
-
+      if (rxFlag) 
+      {
+          rxFlag = 0; 
+          
+          HAL_UART_Transmit(&huart1, (uint8_t *)&rxCmd, 1, 10);
+          DC_CONTROL(rxCmd);
+      }
 
     /* USER CODE END WHILE */
 
@@ -199,8 +185,6 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-
-
 /* USER CODE END 4 */
 
 /**
@@ -210,7 +194,6 @@ void SystemClock_Config(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
   while (1)
   {
@@ -228,8 +211,6 @@ void Error_Handler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

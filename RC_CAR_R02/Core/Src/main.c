@@ -34,6 +34,10 @@
 #include "direction.h"
 #include "speed.h"
 #include "delay.h"
+#include "stdio.h"
+//#include "ledbar.h"
+#include "ultrasonic.h"
+#include "statemachine.h"
 
 
 
@@ -50,10 +54,42 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+
+
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+
+
+
+#ifdef __GNUC__
+/* With GCC small printf (option LD Linker->Libraries->Small printf
+ * set to 'Yes') calls __io_putchar() */
+#define PUTCHAR_PROTOTYPE int  __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int  fputc(int ch, FILE *f)
+#endif /* __GNUC__*/
+
+/** @brief Retargets the C library printf function to the USART.
+ *  @param None
+ *  @retval None
+ */
+PUTCHAR_PROTOTYPE
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART2 and Loop
+     until the end of transmission */
+  if(ch == '\n')
+  {
+	  HAL_UART_Transmit(&huart2, (uint8_t*) "\r", 1, 0xFFFF);
+  }
+   HAL_UART_Transmit(&huart2, (uint8_t*) &ch, 1, 0xFFFF);\
+   return ch;
+}
+
+
 
 /* USER CODE END PM */
 
@@ -61,11 +97,47 @@
 
 /* USER CODE BEGIN PV */
 
+
+
+//
+//volatile uint8_t rxData[1];
+//volatile uint8_t rxFlag = 0;
+//volatile uint8_t rxCmd = 0;
+
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
+
+
+//void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+//{
+//  Ultrasonic_IC_CaptureCallback(htim);
+//}
+
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+//    if (huart->Instance == USART1)
+//    {
+//        rxCmd = rxData[0];
+//        rxFlag = 1;
+//
+//        HAL_UART_Receive_IT(&huart1, (uint8_t *)rxData, 1);
+//    }
+//}
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+//  if (htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4)
+//    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+
+  Ultrasonic_IC_CaptureCallback(htim);
+}
+
+
 
 /* USER CODE END PFP */
 
@@ -111,6 +183,12 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
+  STMACHINE_Init();
+
+//  HAL_UART_Receive_IT(&huart1, (uint8_t *)rxData, 1);
+
+  HAL_TIM_Base_Start(&htim11);                  // for delay_us function
+  Ultrasonic_Init();
 
 
 
@@ -123,75 +201,103 @@ int main(void)
 
 
 
-
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+
+
   while (1)
   {
 
 
+//	  DC_CONTROL_AUTO();
 
-	  // 1) 정지
-	  Car_Stop();
-	  HAL_Delay(700);
+	  ST_MACHINE();
+//      if (rxFlag)
+//      {
+//          rxFlag = 0;
+//
+//          HAL_UART_Transmit(&huart1, (uint8_t *)&rxCmd, 1, 10);
+//          st_Flag(rxCmd);
+//          st_machine(rxCmd);
+//      }
 
-	  // 2) 전진 (30/50/70/100 순서)
-	  Car_Move(CAR_FRONT, SPD_30);
-	  HAL_Delay(1000);
-	  Car_Move(CAR_FRONT, SPD_50);
-	  HAL_Delay(1000);
-	  Car_Move(CAR_FRONT, SPD_70);
-	  HAL_Delay(1000);
-	  Car_Move(CAR_FRONT, SPD_100);
-	  HAL_Delay(1200);
 
-	  Car_Stop();
-	  HAL_Delay(700);
+//
+//	  Ultrasonic_TriggerAll();
+//	  HAL_Delay(60);
+//
+//
+//
+//	  printf("LEFT : %d cm\r\n CENTER : %d cm\r\n RIGHT : %d cm\r\n",
+//	         Ultrasonic_GetDistanceCm(US_LEFT),
+//	         Ultrasonic_GetDistanceCm(US_CENTER),
+//	         Ultrasonic_GetDistanceCm(US_RIGHT));
+//
+//	  HAL_Delay(1000);
 
-	  // 3) 후진
-	  Car_Move(CAR_BACK, SPD_50);
-	  HAL_Delay(1500);
 
-	  Car_Stop();
-	  HAL_Delay(700);
 
-	  // 4) 제자리(또는 단순) 좌/우 회전 (요구대로 50/0, 0/50)
-	  Car_Move(CAR_LEFT, SPD_70);   // speed 인자는 무시되지만 시그니처 맞춰 넣음
-	  HAL_Delay(900);
-	  Car_Stop();
-	  HAL_Delay(400);
-
-	  Car_Move(CAR_RIGHT, SPD_70);
-	  HAL_Delay(900);
-	  Car_Stop();
-	  HAL_Delay(700);
-
-	  // 5) 대각 전진
-	  Car_Move(CAR_LEFTFRONT, SPD_70);   // 좌 50 / 우 70
-	  HAL_Delay(1200);
-	  Car_Stop();
-	  HAL_Delay(400);
-
-	  Car_Move(CAR_RIGHTFRONT, SPD_70);  // 좌 70 / 우 50
-	  HAL_Delay(1200);
-	  Car_Stop();
-	  HAL_Delay(700);
-
-	  // 6) 대각 후진
-	  Car_Move(CAR_LEFTBACK, SPD_70);
-	  HAL_Delay(1200);
-	  Car_Stop();
-	  HAL_Delay(400);
-
-	  Car_Move(CAR_RIGHTBACK, SPD_70);
-	  HAL_Delay(1200);
-
-	  // 루프 끝 정지
-	  Car_Stop();
-	  HAL_Delay(1500);
+//	  // 1) 정지
+//	  Car_Stop();
+//	  HAL_Delay(700);
+//
+//	  // 2) 전진 (30/50/70/100 순서)
+//	  Car_Move(CAR_FRONT, SPD_30);
+//	  HAL_Delay(1000);
+//	  Car_Move(CAR_FRONT, SPD_50);
+//	  HAL_Delay(1000);
+//	  Car_Move(CAR_FRONT, SPD_70);
+//	  HAL_Delay(1000);
+//	  Car_Move(CAR_FRONT, SPD_100);
+//	  HAL_Delay(1200);
+//
+//	  Car_Stop();
+//	  HAL_Delay(700);
+//
+//	  // 3) 후진
+//	  Car_Move(CAR_BACK, SPD_50);
+//	  HAL_Delay(1500);
+//
+//	  Car_Stop();
+//	  HAL_Delay(700);
+//
+//	  // 4) 제자리(또는 단순) 좌/우 회전 (요구대로 50/0, 0/50)
+//	  Car_Move(CAR_LEFT, SPD_70);   // speed 인자는 무시되지만 시그니처 맞춰 넣음
+//	  HAL_Delay(900);
+//	  Car_Stop();
+//	  HAL_Delay(400);
+//
+//	  Car_Move(CAR_RIGHT, SPD_70);
+//	  HAL_Delay(900);
+//	  Car_Stop();
+//	  HAL_Delay(700);
+//
+//	  // 5) 대각 전진
+//	  Car_Move(CAR_LEFTFRONT, SPD_70);   // 좌 50 / 우 70
+//	  HAL_Delay(1200);
+//	  Car_Stop();
+//	  HAL_Delay(400);
+//
+//	  Car_Move(CAR_RIGHTFRONT, SPD_70);  // 좌 70 / 우 50
+//	  HAL_Delay(1200);
+//	  Car_Stop();
+//	  HAL_Delay(700);
+//
+//	  // 6) 대각 후진
+//	  Car_Move(CAR_LEFTBACK, SPD_70);
+//	  HAL_Delay(1200);
+//	  Car_Stop();
+//	  HAL_Delay(400);
+//
+//	  Car_Move(CAR_RIGHTBACK, SPD_70);
+//	  HAL_Delay(1200);
+//
+//	  // 루프 끝 정지
+//	  Car_Stop();
+//	  HAL_Delay(1500);
 
 
 
@@ -226,11 +332,12 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 4;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLM = 8;
   RCC_OscInitStruct.PLL.PLLN = 100;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
