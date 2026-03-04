@@ -18,16 +18,24 @@
 #include "stdbool.h"
 
 
+#define Block_Distance_Front 35
+#define Block_Distance_Side 20
+#define Crash_Distance 10
+#define Stuck_Timeout 300
+
+
+
 // 초기화: UART1 인터럽트 시작 등
 void STMACHINE_Init(void);
 
-// 루프 처리: rxFlag 확인 및 동작 수행
+void SHOW_UART2();
 
 typedef enum
 {
 	AUTO_STATE_SCAN,
 	AUTO_STATE_STOP,
 	AUTO_STATE_AVOID,
+	AUTO_STATE_BACK,
 }AUTO_STATE;
 
 

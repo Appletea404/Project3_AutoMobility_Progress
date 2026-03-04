@@ -22,7 +22,11 @@ typedef enum
   SPD_STOP = 0,   // 0%
   SPD_30,         // 30%
   SPD_50,         // 50%
+  SPD_60,
+  SPD_65,
   SPD_70,         // 70%
+  SPD_75,
+  SPD_80,
   SPD_100         // 100%
 } speed_state_t;
 

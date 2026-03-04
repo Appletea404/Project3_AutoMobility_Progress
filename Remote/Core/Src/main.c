@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "dma.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -49,8 +50,8 @@
 
 /* USER CODE BEGIN PV */
 
-uint16_t adc_x = 0;  // S-X1
 uint16_t adc_y = 0;  // S-Y1
+uint16_t adc_x = 0;  // S-X2
 uint8_t  bt_cmd = 'S';
 uint8_t  bt_cmd_prev = 'S';
 
@@ -97,6 +98,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART1_UART_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
@@ -114,6 +116,24 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+	  // 1. 버튼 상태 먼저 읽기
+	      if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2) == GPIO_PIN_RESET) // SWA: 오토 모드
+	      {
+	          bt_cmd = 'A';
+	          HAL_UART_Transmit(&huart1, &bt_cmd, 1, 10);
+	          bt_cmd_prev = bt_cmd;
+	          HAL_Delay(300); // 500ms보다 조금 짧은 300ms 정도로도 충분합니다.
+	          continue; // 버튼 처리 후 루프 처음으로 돌아가서 조이스틱 로직 건너뜀
+	      }
+	      else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3) == GPIO_PIN_RESET) // SWB: 매뉴얼 모드
+	      {
+	          bt_cmd = 'P';
+	          HAL_UART_Transmit(&huart1, &bt_cmd, 1, 10);
+	          bt_cmd_prev = bt_cmd;
+	          HAL_Delay(300);
+	          continue;
+	      }
 
 
 	  // 1. ADC 변환 시작 (Rank 1, 2 순차 실행)
@@ -135,11 +155,30 @@ int main(void)
 	      HAL_ADC_Stop(&hadc1);
 
 	      // --- 조이스틱 방향 판별 및 전송 로직 ---
-	      if      (adc_x < 1000) bt_cmd = 'F'; // 전진
-	      else if (adc_x > 3000) bt_cmd = 'B'; // 후진
-//	      else if (adc_x < 1000) bt_cmd = 'L'; // 좌회전
-//	      else if (adc_x > 3000) bt_cmd = 'R'; // 우회전
-	      else                   bt_cmd = 'S'; // 정지
+	      if (adc_y > 3000)
+		  {
+	    	  if(adc_y > 4000) bt_cmd = 'F';	//전진
+	    	  else bt_cmd = 'Q';				//약전진
+		  }
+	      else if (adc_y < 1000)
+		  {
+			  if(adc_y < 200) bt_cmd = 'B';		//후진
+			  else bt_cmd = 'W';				//약후진
+		  }
+
+	      else if (adc_x > 3000)
+		  {
+			  if(adc_x > 4000) bt_cmd = 'L';	//전진
+			  else bt_cmd = 'E';				//약전진
+		  }
+		  else if (adc_x < 1000)
+		  {
+			  if(adc_x < 200) bt_cmd = 'R';		//후진
+			  else bt_cmd = 'T';				//약후진
+		  }
+		  else bt_cmd = 'S';
+
+
 
 	      if (bt_cmd != bt_cmd_prev)
 	      {

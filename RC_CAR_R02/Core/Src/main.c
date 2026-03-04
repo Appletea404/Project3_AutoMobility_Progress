@@ -113,29 +113,13 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
 
+
+//
 //void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 //{
+//
 //  Ultrasonic_IC_CaptureCallback(htim);
 //}
-
-//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-//{
-//    if (huart->Instance == USART1)
-//    {
-//        rxCmd = rxData[0];
-//        rxFlag = 1;
-//
-//        HAL_UART_Receive_IT(&huart1, (uint8_t *)rxData, 1);
-//    }
-//}
-
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
-{
-//  if (htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4)
-//    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-
-  Ultrasonic_IC_CaptureCallback(htim);
-}
 
 
 
@@ -185,18 +169,9 @@ int main(void)
 
   STMACHINE_Init();
 
-//  HAL_UART_Receive_IT(&huart1, (uint8_t *)rxData, 1);
 
   HAL_TIM_Base_Start(&htim11);                  // for delay_us function
-  Ultrasonic_Init();
 
-
-
-  // 1) speed 모듈에 TIM2 채널 연결
-  Speed_Init(&htim2, TIM_CHANNEL_1, &htim2, TIM_CHANNEL_2);
-
-  // 2) PWM Start + 초기 STOP
-  Car_Init();
 
 
 
@@ -211,95 +186,9 @@ int main(void)
   while (1)
   {
 
-
-//	  DC_CONTROL_AUTO();
+//	  SHOW_UART2();
 
 	  ST_MACHINE();
-//      if (rxFlag)
-//      {
-//          rxFlag = 0;
-//
-//          HAL_UART_Transmit(&huart1, (uint8_t *)&rxCmd, 1, 10);
-//          st_Flag(rxCmd);
-//          st_machine(rxCmd);
-//      }
-
-
-//
-//	  Ultrasonic_TriggerAll();
-//	  HAL_Delay(60);
-//
-//
-//
-//	  printf("LEFT : %d cm\r\n CENTER : %d cm\r\n RIGHT : %d cm\r\n",
-//	         Ultrasonic_GetDistanceCm(US_LEFT),
-//	         Ultrasonic_GetDistanceCm(US_CENTER),
-//	         Ultrasonic_GetDistanceCm(US_RIGHT));
-//
-//	  HAL_Delay(1000);
-
-
-
-//	  // 1) 정지
-//	  Car_Stop();
-//	  HAL_Delay(700);
-//
-//	  // 2) 전진 (30/50/70/100 순서)
-//	  Car_Move(CAR_FRONT, SPD_30);
-//	  HAL_Delay(1000);
-//	  Car_Move(CAR_FRONT, SPD_50);
-//	  HAL_Delay(1000);
-//	  Car_Move(CAR_FRONT, SPD_70);
-//	  HAL_Delay(1000);
-//	  Car_Move(CAR_FRONT, SPD_100);
-//	  HAL_Delay(1200);
-//
-//	  Car_Stop();
-//	  HAL_Delay(700);
-//
-//	  // 3) 후진
-//	  Car_Move(CAR_BACK, SPD_50);
-//	  HAL_Delay(1500);
-//
-//	  Car_Stop();
-//	  HAL_Delay(700);
-//
-//	  // 4) 제자리(또는 단순) 좌/우 회전 (요구대로 50/0, 0/50)
-//	  Car_Move(CAR_LEFT, SPD_70);   // speed 인자는 무시되지만 시그니처 맞춰 넣음
-//	  HAL_Delay(900);
-//	  Car_Stop();
-//	  HAL_Delay(400);
-//
-//	  Car_Move(CAR_RIGHT, SPD_70);
-//	  HAL_Delay(900);
-//	  Car_Stop();
-//	  HAL_Delay(700);
-//
-//	  // 5) 대각 전진
-//	  Car_Move(CAR_LEFTFRONT, SPD_70);   // 좌 50 / 우 70
-//	  HAL_Delay(1200);
-//	  Car_Stop();
-//	  HAL_Delay(400);
-//
-//	  Car_Move(CAR_RIGHTFRONT, SPD_70);  // 좌 70 / 우 50
-//	  HAL_Delay(1200);
-//	  Car_Stop();
-//	  HAL_Delay(700);
-//
-//	  // 6) 대각 후진
-//	  Car_Move(CAR_LEFTBACK, SPD_70);
-//	  HAL_Delay(1200);
-//	  Car_Stop();
-//	  HAL_Delay(400);
-//
-//	  Car_Move(CAR_RIGHTBACK, SPD_70);
-//	  HAL_Delay(1200);
-//
-//	  // 루프 끝 정지
-//	  Car_Stop();
-//	  HAL_Delay(1500);
-
-
 
 
 
