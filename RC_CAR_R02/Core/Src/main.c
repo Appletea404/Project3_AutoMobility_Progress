@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "i2c.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -38,6 +39,7 @@
 //#include "ledbar.h"
 #include "ultrasonic.h"
 #include "statemachine.h"
+#include "ina219.h"
 
 
 
@@ -103,6 +105,12 @@ PUTCHAR_PROTOTYPE
 //volatile uint8_t rxData[1];
 //volatile uint8_t rxFlag = 0;
 //volatile uint8_t rxCmd = 0;
+volatile float v_bus = 0.0f;
+volatile float i_ma = 0.0f;
+volatile float spd_100_v[20] = {0.0f};
+volatile float spd_100_i[20] = {0.0f};
+volatile float spd_60_v[30] = {0.0f};
+volatile float spd_60_i[30] = {0.0f};
 
 
 
@@ -165,6 +173,7 @@ int main(void)
   MX_TIM4_Init();
   MX_TIM11_Init();
   MX_USART1_UART_Init();
+  MX_I2C3_Init();
   /* USER CODE BEGIN 2 */
 
   STMACHINE_Init();
@@ -173,8 +182,36 @@ int main(void)
   HAL_TIM_Base_Start(&htim11);                  // for delay_us function
 
 
+//  Car_Move(CAR_FRONT, SPD_100);
+//
+//
+//
+//  		for (int var = 0; var < 20; var++)
+//  		{
+//  			v_bus = INA219_ReadBusVoltage(&hi2c3);
+//  			i_ma = INA219_ReadCurrent(&hi2c3);
+//  			spd_100_v[var] = v_bus;
+//  			spd_100_i[var] = i_ma;
+//
+//  			HAL_Delay(1000);
+//  		}
+//  	Car_Stop();
 
 
+//  	Car_Move(CAR_FRONT, SPD_60);
+//
+//
+//
+//  	  		for (int var = 0; var <= 20; var++)
+//  	  		{
+//  	  			v_bus = INA219_ReadBusVoltage(&hi2c3);
+//  	  			i_ma = INA219_ReadCurrent(&hi2c3);
+//  	  			spd_60_v[var] = v_bus;
+//  	  			spd_60_i[var] = i_ma;
+//
+//  	  			HAL_Delay(1000);
+//  	  		}
+//  	  	Car_Stop();
 
   /* USER CODE END 2 */
 
@@ -185,6 +222,11 @@ int main(void)
 
   while (1)
   {
+
+
+
+
+
 
 //	  SHOW_UART2();
 
