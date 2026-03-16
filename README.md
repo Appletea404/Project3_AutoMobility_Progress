@@ -109,10 +109,8 @@ Project3_AutoMobility/
 
 ## 6. Troubleshooting (문제 해결 기록)
 
-<details>
-<summary> <b> 초음파 센서 데이터가 튐 (Outlier) </b></summary>
+### 6.1 초음파 센서 데이터가 튐 (Outlier)
 
-<br>
 
 🔍  **Issue (문제 상황)**
 
@@ -122,7 +120,7 @@ Project3_AutoMobility/
 
 - STM32 디버깅 툴을 통해 3개의 초음파 센서의 데이터를 검사한 결과 **200cm**가 넘는 값이 일시적으로 감지됨을 인지
 
-- 이러한 급격한 데이터 변화가 자율 주행 로직의 판단 임계치를 순간적으로 넘기면서 시스템 오작동을 유발함.
+- 이러한 급격한 데이터 변화가 자율 주행 로직의 판단 임계치를 순간적으로 넘기면서 시스템 오작동을 유발함
 
 ❗ **Action (해결 방법)**
 
@@ -132,13 +130,10 @@ Project3_AutoMobility/
 
 - 센서 데이터의 값이 오버해서 차량이 오작동하는 일이 없어짐
 
-</details>
+---
 
+### 6.2 장애물 회피 시 방향 결정 알고리즘의 불안정성 (Left-Right Misjudgment) 
 
-<details>
-<summary> <b> 장애물 회피 시 방향 결정 알고리즘의 불안정성 (Left-Right Misjudgment) </b></summary>
-
-<br>
 
 🔍  **Issue (문제 상황)**
 
@@ -155,12 +150,11 @@ Project3_AutoMobility/
 ✅ **Result (결과)**
 
 - 좌우판단을 더 이상 오판하지 않음
-</details>
 
-<details>
-<summary> <b> 넓은 코너에 진입하면 갇힘 (Get trapped in Wide Corner) </b></summary>
+---
 
-<br>
+### 6.3  넓은 코너에 진입하면 갇힘 (Get trapped in Wide Corner) 
+
 
 🔍  **Issue (문제 상황)**
 
@@ -172,14 +166,13 @@ Project3_AutoMobility/
 
 ❗ **Action (해결 방법)**
 
-- Crash_Distance란 변수를 추가하여 정면센서가 이 거리에 도달하면 강제 후진 로직을 최우선으로 올림
+- **Crash_Distance** 변수를 추가하여 정면센서가 이 거리에 도달하면 강제 후진 로직을 최우선으로 올림
 - 후진이후 강제로 회전하면서 좌우 센서값을 강제로 갱신시킴
-이후 회피판단로직 실행
+이후 회피판단 실행
 
 ✅ **Result (결과)**
 
 - 넓은 코너에서 더 이상 갇히는 일이 없어짐
 
-</details>
 
 
